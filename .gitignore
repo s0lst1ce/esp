@@ -1,0 +1,6 @@
+.vscode
+*.code-workspace
+*.cfg
+bin
+lib
+lib64
