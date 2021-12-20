@@ -55,7 +55,8 @@ def plot_power(amount, real_mean, real_sigma):
 
 def main():
     print("all is well")
-    plot_power(256, -55, 1.6)
+    # plot_power(256, -55, 1.6)
+    # print(read_csv("config-reseau.csv"))
 
 
 # TODO build an example dict for the esp8266 as a mind-note
@@ -65,6 +66,9 @@ def read_csv(file_name):
     esps = []
     with open(file_name, "r") as file:
         for line in file.readlines():
+            if line.startswith("#"):
+                continue
+            line = line.strip("\n")
             morsels = line.split("\t")
             esps.append(build_esp_dict(morsels))
     return esps
@@ -72,16 +76,18 @@ def read_csv(file_name):
 
 def build_esp_dict(morsels):
     path_loss_params = {}
-    path_loss_params["sigma"] = morsels.pop()
-    path_loss_params["gamma"] = morsels.pop()
-    path_loss_params["d0"] = morsels.pop()
-    path_loss_params["P0"] = morsels.pop()
+    path_loss_params["sigma"] = float(morsels.pop())
+    path_loss_params["gamma"] = float(morsels.pop())
+    path_loss_params["d0"] = float(morsels.pop())
+    path_loss_params["P0"] = float(morsels.pop())
 
     esp = {"path_loss_params": path_loss_params}
-    y, x = morsels.pop(), morsels.pop()
+    y, x = float(morsels.pop()), float(morsels.pop())
     esp["coordinates"] = (x, y)
-    esp["reference_node"] = morsels.pop()
-    esp["id"] = morsels.pop()
+
+    is_true = lambda val: val == "True"
+    esp["reference_node"] = is_true(morsels.pop())
+    esp["id"] = int(morsels.pop())
     return esp
 
 
