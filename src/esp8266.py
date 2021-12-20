@@ -1,18 +1,17 @@
-from math import log
+from utils import *
+from math import log10
 
 
-def distance(pos0, pos1):
-    x0, y0 = pos0
-    x1, y1 = pos1
-    return sqrt((y1 - y0) ** 2 + (x1 - x0) ** 2)
+def mean_power(distance, loss_params):
+    return loss_params["P0"] - 10 * loss_params["gamma"] * log10(distance)
 
 
 def path_loss_params_estimation(s1, s2):
     d1, p1 = s1
     d2, p2 = s2
 
-    gamma = p1 - p2 / (10 * log(d2 / d1))
-    p0 = (p1 + p2 + 20 * gamma * log((d1 * d2) / (d0 ** 2))) / 2
+    gamma = p1 - p2 / (10 * log10(d2 / d1))
+    p0 = (p1 + p2 + 20 * gamma * log10((d1 * d2) / (d0 ** 2))) / 2
 
     return (p0, 1, gamma)
 
