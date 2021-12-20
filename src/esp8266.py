@@ -68,7 +68,7 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
 
 def calibrage_references(esps):
     ref_esps = reference_nodes(esps)
-    assert len(esps) >= 3, ValueError(
+    assert len(ref_esps) >= 3, ValueError(
         "At least three reference nodes are needed to calibrate"
     )
 
