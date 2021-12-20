@@ -28,11 +28,14 @@ def variance(values):
 
 
 def frequencies(values, margin=0):
+    values.sort()
     freq = {}
-    for val in values:
+    for (val, i) in zip(values, range(len(values))):
         # could be improved with the new pattern matching introduced in python3.10
-        if val in freq:
-            freq[val] += 1
+        if val - margin <= values[i - 1] <= val + margin:
+            indices = list(freq.keys())
+            indices.sort()
+            freq[indices[-1]] += 1
         else:
             freq[val] = 1
     return freq
@@ -45,14 +48,14 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
 def plot_power(amount, real_mean, real_sigma):
     # WIP, just for testing atm
     values = get_measures(amount, real_mean, real_sigma)
-    freq = frequencies(values)
+    freq = frequencies(values, margin=0.1)
     plt.plot(freq.keys(), freq.values())
     plt.show()
 
 
 def main():
     print("all is well")
-    plot_power(128, -55, 1.6)
+    plot_power(256, -55, 1.6)
 
 
 # TODO build an example dict for the esp8266 as a mind-note
