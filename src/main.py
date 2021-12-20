@@ -62,7 +62,27 @@ def main():
 
 
 def read_csv(file_name):
-    pass
+    esps = []
+    with open(file_name, "r") as file:
+        for line in file.readlines():
+            morsels = line.split("\t")
+            esps.append(build_esp_dict(morsels))
+    return esps
+
+
+def build_esp_dict(morsels):
+    path_loss_params = {}
+    path_loss_params["sigma"] = morsels.pop()
+    path_loss_params["gamma"] = morsels.pop()
+    path_loss_params["d0"] = morsels.pop()
+    path_loss_params["P0"] = morsels.pop()
+
+    esp = {"path_loss_params": path_loss_params}
+    y, x = morsels.pop(), morsels.pop()
+    esp["coordinates"] = (x, y)
+    esp["reference_node"] = morsels.pop()
+    esp["id"] = morsels.pop()
+    return esp
 
 
 def sqrt(value):
