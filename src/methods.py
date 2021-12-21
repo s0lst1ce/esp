@@ -40,9 +40,11 @@ def methode_MonteCarlo(
 
     if nb_tirages is None:
         # jspas quel choix a le plus de sens :shrug:
-        points_nbr = max(width, height)
+        points_nbr = int(max(width, height)) + 1
 
-    assert points_nbr > 0, "Width and height must be greater than 0"
+    assert (
+        points_nbr > 0
+    ), f"Width and height must be greater than 0, got {width}, {height}"
 
     min_mse = None
     matching_pos = None
@@ -86,6 +88,6 @@ def methode_gradient(
         )
 
         if outcome.success:
-            esp["predicted_position"] = (rex.x[0], res.x[1])
+            esp["predicted_position"] = (outcome.x[0], outcome.x[1])
         else:
             esp["predicted_position"] = random_uniform_pos(dims)
