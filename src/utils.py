@@ -44,3 +44,24 @@ def frequencies(values, margin=0):
         else:
             freq[val] = 1
     return freq
+
+
+def into_corners(dims):
+    (x0, y0, width, height) = dims
+    corners = []
+    for i in range(2):
+        for j in range(2):
+            x, y = x0 + i * width / 2, y0 + j * height / 2
+            w, h = width / 2, height / 2
+            corners.append((x, y, w, h))
+    return corners
+
+
+def middle_rect(dims):
+    (x0, y0, width, height) = dims
+    return (x0 + width / 2, y0 + height / 2)
+
+
+def random_uniform_pos(dims):
+    (x0, y0, width, height) = dims
+    return (random.uniform(x0, x0 + width), random.uniform(y0, y0 + height))

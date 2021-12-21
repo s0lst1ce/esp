@@ -17,9 +17,10 @@ def path_loss_params_estimation(s1, s2):
 
 
 def reference_nodes(esps):
+    ref_esps = []
     for esp in esps:
-        if esp["reference_node"] == False:
-            esps.pop(esp)
+        if esp["reference_node"] == True:
+            ref_esps.append(esp)
     return esps
 
 
@@ -67,9 +68,7 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
 
 def calibrage_references(esps):
     ref_esps = reference_nodes(esps)
-    assert len(ref_esps) >= 3, ValueError(
-        "At least three reference nodes are needed to calibrate"
-    )
+    assert len(ref_esps) >= 3, "At least three reference nodes are needed to calibrate"
 
     for esp in ref_esps:
         esp1, esp2 = deux_plus_proches_voisins(esp, ref_esps)
@@ -80,3 +79,39 @@ def calibrage_references(esps):
         sig2 = signal_moyen(esp, esp2)
         (P0, d0, gamma) = path_loss_params_estimation((d1, sig1), (d2, sig2))
         esp["estimated_path_loss_params"] = {"P0": P0, "d0": d0, "gamma": gamma}
+
+
+def distances_aux_references(esp, ref_esps):
+    distances = []
+    for ref_esp in ref_esps:
+        dist = distance(esp["coordinates"], ref_esp["coordinates"])
+        if dist >= 20:
+            dist = None
+        distances.append(dist)
+
+    return distances
+
+
+def MSE(pos, ref_esps, distances):
+    assert (node_nbr := len(ref_esps)) == len(
+        distances
+    ), "ref_esps and distances must have as many elements, and have the same order"
+
+    count = 0
+    total = 0
+    for i in range(node_nbr):
+        ref_esp = ref_esps[i]
+        real_distance = distances[i]
+        if real_distance is not None:
+            measured_distance = distance(pos, ref_esp["coordinates"])
+            total += (real_distance - measured_distance) ** 2
+            count += 1
+
+    try:
+        total /= count
+    # if all distances were `None` then the count is 0, hence the exception
+    # we then use -1.0 as the dummy value to denote the incapacity to calculate the MSE
+    except ZeroDivisionError:
+        total = -1.0
+
+    return total

@@ -2,6 +2,7 @@ from math import log10
 import random
 from matplotlib import pyplot as plt
 from esp8266 import *
+from methods import methode_partition
 
 
 def plot_power(signals, real_mean, real_sigma):
@@ -18,10 +19,13 @@ def main():
     # print(read_csv("config-reseau.csv"))
     esps = read_csv("config-reseau.csv")
     power = signal_moyen(esps[0], esps[1])
-    print(power)
 
-
-# TODO build an example dict for the esp8266 as a mind-note
+    methode_partition(
+            esps[2],
+            reference_nodes(esps),
+            distances_aux_references(esps[2], reference_nodes(esps)),
+            (0, 0, 10, 10),
+        )
 
 
 def read_csv(file_name):
