@@ -44,7 +44,7 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
 
     real_mean = mean_power(d, emetteur["path_loss_params"])
     sigma = emetteur["path_loss_params"]["sigma"]
-    signals = get_measures(
+    signals = get_signals(
         amount,
         real_mean,
         sigma,
@@ -54,7 +54,7 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
 
     while True:
         signals.extend(
-            get_measures(
+            get_signals(
                 amount,
                 real_mean,
                 sigma,

@@ -1,4 +1,4 @@
-from math import sqrt
+from math import sqrt, log10
 import random
 
 
@@ -42,9 +42,19 @@ def distance(pos0, pos1):
     return ((y1 - y0) * (y1 - y0) + (x1 - x0) * (x1 - x0)) ** 0.5
 
 
-def get_measures(amount: int, mean, sigma):
+def get_signals(amount: int, mean, sigma):
     # valeurs aléatoires sur une distribution gaussienne
     return [random.gauss(mean, sigma) for _ in range(amount)]
+
+
+def get_signal_from_esp(esp, distance):
+    params = esp["path_loss_params"]
+    P0 = params["P0"]
+    d0 = params["d0"]
+    gamma = params["gamma"]
+    sigma = params["sigma"]
+
+    return P0 - 10 * gamma * log10(distance / d0) + random.gauss(0, sigma)
 
 
 def expectancy(values):

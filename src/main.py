@@ -4,7 +4,7 @@ import random
 from matplotlib import pyplot as plt
 from esp8266 import *
 from methods import methode_partition, methode_MonteCarlo, methode_gradient
-from graphical import plot_reseau
+from graphical import plot_reseau, create_fluctuation_video
 
 
 def plot_power(signals, real_mean, real_sigma):
@@ -24,7 +24,9 @@ def main():
 
     # methods_comparison((0, -3, 8, 8), source_file="config-reseau.csv")
     esps, dims = random_set()
-    methods_comparison(dims, esps=esps)
+    # methods_comparison(dims, esps=esps)
+
+    create_fluctuation_video(reference_nodes(esps)[0])
 
 
 def random_set():
@@ -52,8 +54,7 @@ def methods_comparison(dims, source_file=None, esps=[]):
 
     ref_esps = reference_nodes(esps)
     calibrage_references(ref_esps)
-    # change this part so that it works for any number of non-reference esps
-    # and when we don't know its position in the list
+
     distances = {}
     for esp in esps:
         if not esp["reference_node"]:
