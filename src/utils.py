@@ -2,7 +2,6 @@ from math import sqrt
 import random
 
 
-
 def read_csv(file_name):
     esps = []
     try:
@@ -39,10 +38,12 @@ def esp_from_string(morsels):
 def distance(pos0, pos1):
     x0, y0 = pos0
     x1, y1 = pos1
-    return sqrt((y1 - y0) ** 2 + (x1 - x0) ** 2)
+    # distance euclidienne
+    return ((y1 - y0) * (y1 - y0) + (x1 - x0) * (x1 - x0)) ** 0.5
 
 
 def get_measures(amount: int, mean, sigma):
+    # valeurs aléatoires sur une distribution gaussienne
     return [random.gauss(mean, sigma) for _ in range(amount)]
 
 
@@ -52,6 +53,8 @@ def expectancy(values):
     Indeed, although it enventually performs the correct calculation
     it makes use of the specific formula used in this scenario to optimize away the very notion of probability.
     This whole simplification process brings it down to a simple weighted average.
+
+    L'espérance est tout simplement la moyenne des puissances du signal
     """
     return sum(values) / len(values)
 
@@ -67,17 +70,12 @@ def variance(values):
 
 
 def frequencies(values, margin=0):
-    values.sort()
     freq = {}
-    for (val, i) in zip(values, range(len(values))):
-        # could be improved with the new pattern matching introduced in python3.10
-        if val - margin <= values[i - 1] <= val + margin:
-            indices = list(freq.keys())
-            indices.sort()
-            freq[indices[-1]] += 1
-        else:
-            freq[val] = 1
-    return freq
+    for value in values:
+        if margin != 0:
+            value = value // margin * margin
+        freq[value] = freq.get(value, 0) + 1
+    return dict(sorted(freq.items()))
 
 
 def into_corners(dims):

@@ -1,6 +1,7 @@
 from utils import *
 from matplotlib import pyplot as plt
 from matplotlib import axes
+import progressbar as pb
 
 
 def plot_sensors(esps, fig):
@@ -30,3 +31,11 @@ def plot_reseau(esps, dims, title, fig):
     fig.set_ylim(y0, y0 + height)
     fig.set_title(title)
     plot_sensors(esps, fig)
+
+
+def animation(frame, esp, data, limit):
+    pass
+
+
+def show_progress(frame, total_frames):
+    pbx.update(frame)

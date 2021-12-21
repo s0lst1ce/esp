@@ -15,7 +15,7 @@ def path_loss_params_estimation(s1, s2):
     gamma = p1 - p2 / (10 * log10(d2 / d1))
     p0 = (p1 + p2 + 20 * gamma * log10((d1 * d2) / (d0 ** 2))) / 2
 
-    return (p0, 1, gamma)
+    return (p0, d0, gamma)
 
 
 def reference_nodes(esps):
@@ -33,7 +33,7 @@ def deux_plus_proches_voisins(ref_esp, esps):
         dist_map[distance(ref_pos, esp["coordinates"])] = esp
     distances = list(dist_map.keys())
     distances.sort()
-    # ew don't take the first element since it would be the distance to itself
+    # we don't take the first element since it would be the distance to itself
     return (dist_map[distances[1]], dist_map[distances[2]])
 
 
@@ -101,23 +101,23 @@ def MSE(pos, ref_esps, distances):
     ), "ref_esps and distances must have as many elements, and have the same order"
 
     count = 0
-    total = 0
+    score = 0
     for i in range(node_nbr):
         ref_esp = ref_esps[i]
         real_distance = distances[i]
         if real_distance is not None:
             measured_distance = distance(pos, ref_esp["coordinates"])
-            total += (real_distance - measured_distance) ** 2
+            score += (real_distance - measured_distance) ** 2
             count += 1
 
     try:
-        total /= count
+        score /= count
     # if all distances were `None` then the count is 0, hence the exception
     # we then use -1.0 as the dummy value to denote the incapacity to calculate the MSE
     except ZeroDivisionError:
-        total = -1.0
+        score = -1.0
 
-    return total
+    return score
 
 
 def new_esp(identifier, dims, ref=False):
@@ -138,3 +138,13 @@ def to_esp(identifier, pos, P0, gamma, sigma, ref=False, d0=1.0):
         "reference_node": ref,
         "id": identifier,
     }
+
+
+def apply_method(
+    esps, ref_esps, distances, dims, methode_interpolation, *args, **kwargs
+):
+    for esp in esps:
+        if not esp["reference_node"]:
+            methode_interpolation(
+                esp, ref_esps, distances[esp["id"]], dims, *args, **kwargs
+            )

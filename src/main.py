@@ -17,12 +17,12 @@ def plot_power(signals, real_mean, real_sigma):
 
 def main():
     print("Running ESP8266 positionning simulation")
-    # plot_power(256, -55, 1.6)
+    # plot_power(get_measures(4096, -55, 1.6))
     # print(read_csv("config-reseau.csv"))
     esps = read_csv("config-reseau.csv")
     power = signal_moyen(esps[0], esps[1])
 
-    methods_comparison((0, -3, 8, 8), source_file="config-reseau.csv")
+    # methods_comparison((0, -3, 8, 8), source_file="config-reseau.csv")
     esps, dims = random_set()
     methods_comparison(dims, esps=esps)
 
@@ -54,7 +54,11 @@ def methods_comparison(dims, source_file=None, esps=[]):
     calibrage_references(ref_esps)
     # change this part so that it works for any number of non-reference esps
     # and when we don't know its position in the list
-    distances = distances_aux_references(esps[2], ref_esps)
+    distances = {}
+    for esp in esps:
+        if not esp["reference_node"]:
+            distances[esp["id"]] = distances_aux_references(esp, ref_esps)
+
     fig, axs = plt.subplots(3, 4, figsize=(12, 8))
 
     # graphiques de références, sans application de méthode de détetection
@@ -62,11 +66,11 @@ def methods_comparison(dims, source_file=None, esps=[]):
     plot_reseau(ref_esps, dims, "Réseau de noeuds", axs[0][1])
 
     # méthode de partition
-    methode_partition(esps[2], ref_esps, distances, dims)
+    apply_method(esps, ref_esps, distances, dims, methode_partition)
     plot_reseau(ref_esps, dims, "Méthode par partition", axs[0][2])
 
     # méthode de Monte-Carlo
-    methode_MonteCarlo(esps[2], ref_esps, distances, dims)
+    apply_method(esps, ref_esps, distances, dims, methode_MonteCarlo)
     plot_reseau(ref_esps, dims, "Méthode de Monté-Carlo", axs[0][3])
 
     # méthodes de gradient utilisant les divers méthode de calcul de gradient
@@ -82,7 +86,7 @@ def methods_comparison(dims, source_file=None, esps=[]):
         "COBYLA",
         "SLSQP",
     ):
-        methode_gradient(esps[2], ref_esps, distances, dims, methode=method)
+        apply_method(esps, ref_esps, distances, dims, methode_gradient, methode=method)
         plot_reseau(esps, dims, f"Méthode du gradient ({method})", axs[i, j])
         j += 1
         if j == 4:
