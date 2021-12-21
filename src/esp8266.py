@@ -3,7 +3,6 @@ from math import log10
 
 
 def mean_power(distance, loss_params):
-    print(distance)
     return loss_params["P0"] - 10 * loss_params["gamma"] * log10(distance)
 
 
@@ -119,3 +118,23 @@ def MSE(pos, ref_esps, distances):
         total = -1.0
 
     return total
+
+
+def new_esp(identifier, dims, ref=False):
+    # change to something more random
+    pos = random_uniform_pos(dims)
+    d0 = 1.0
+    P0 = -random.randrange(450, 650) / 10
+    gamma = random.randrange(20, 30) / 10
+    sigma = random.randrange(100, 200) / 100
+    return to_esp(identifier, pos, P0, gamma, sigma, d0=d0, ref=ref)
+
+
+def to_esp(identifier, pos, P0, gamma, sigma, ref=False, d0=1.0):
+    path_loss_params = {"sigma": sigma, "gamma": gamma, "d0": d0, "P0": P0}
+    return {
+        "path_loss_params": path_loss_params,
+        "coordinates": pos,
+        "reference_node": ref,
+        "id": identifier,
+    }

@@ -1,3 +1,4 @@
+#!/usr/bin/python3.9
 from math import log10
 import random
 from matplotlib import pyplot as plt
@@ -15,49 +16,34 @@ def plot_power(signals, real_mean, real_sigma):
 
 
 def main():
-    print("all is well")
+    print("Running ESP8266 positionning simulation")
     # plot_power(256, -55, 1.6)
     # print(read_csv("config-reseau.csv"))
     esps = read_csv("config-reseau.csv")
     power = signal_moyen(esps[0], esps[1])
 
-    setup((0, -3, 8, 8), source_file="config-reseau.csv")
+    methods_comparison((0, -3, 8, 8), source_file="config-reseau.csv")
+    esps, dims = random_set()
+    methods_comparison(dims, esps=esps)
 
 
-def read_csv(file_name):
+def random_set():
+    ref_node_count = random.randrange(3, 20)
+    node_count = ref_node_count + random.randrange(1, 10)
+    width = random.randrange(10, 50)
+    height = random.randrange(10, 50)
+    dims = (0, 0, width, height)
+
     esps = []
-    try:
-        with open(file_name, "r") as file:
-            for line in file.readlines():
-                if line.startswith("#"):
-                    continue
-                line = line.strip("\n")
-                morsels = line.split("\t")
-                esps.append(build_esp_dict(morsels))
-    except Exception as e:
-        print("Could not find file : ", file_name)
-        raise e
-    return esps
+    for i in range(ref_node_count):
+        esps.append(new_esp(i, dims, ref=True))
+    for i in range(ref_node_count, node_count):
+        esps.append(new_esp(i, dims))
+
+    return (esps, dims)
 
 
-def build_esp_dict(morsels):
-    path_loss_params = {}
-    path_loss_params["sigma"] = float(morsels.pop())
-    path_loss_params["gamma"] = float(morsels.pop())
-    path_loss_params["d0"] = float(morsels.pop())
-    path_loss_params["P0"] = float(morsels.pop())
-
-    esp = {"path_loss_params": path_loss_params}
-    y, x = float(morsels.pop()), float(morsels.pop())
-    esp["coordinates"] = (x, y)
-
-    is_true = lambda val: val == "True"
-    esp["reference_node"] = is_true(morsels.pop())
-    esp["id"] = int(morsels.pop())
-    return esp
-
-
-def setup(dims, source_file=None, esps=[]):
+def methods_comparison(dims, source_file=None, esps=[]):
     if source_file is not None:
         try:
             esps.extend(read_csv(source_file))

@@ -11,15 +11,17 @@ def plot_sensors(esps, fig):
         else:
             # blue
             color = "b"
-        (x, y) = esp["coordinates"]
         identifier = esp["id"]
-        fix.plot(x, y, color + ".")
-        fix.text(x, y, identifier)
+        (x, y) = esp["coordinates"]
 
-        if (pos := "predicted_position") in esp:
+        if "predicted_position" in esp:
+            pos = esp["predicted_position"]
             fig.plot(*pos, color + ".")
             d = distance((x, y), pos)
-            fix.text(x1, y1, f"{identifier} ({d:.2f})")
+            fig.text(*pos, f"{identifier} ({d:.2f})")
+        else:
+            fig.plot(x, y, color + ".")
+            fig.text(x, y, identifier)
 
 
 def plot_reseau(esps, dims, title, fig):
@@ -27,3 +29,4 @@ def plot_reseau(esps, dims, title, fig):
     fig.set_xlim(x0, x0 + width)
     fig.set_ylim(y0, y0 + height)
     fig.set_title(title)
+    plot_sensors(esps, fig)
