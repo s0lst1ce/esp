@@ -1,3 +1,6 @@
+# Fournit des fonctions permettant de visualiser différents aspects
+# des simulatons.
+
 from utils import *
 from matplotlib import pyplot as plt
 from matplotlib import animation as anm
@@ -6,6 +9,9 @@ import progressbar as pbar
 
 
 def plot_sensors(esps, fig):
+    """
+    Place les esp sur le plan.
+    """
     for esp in esps:
         if esp["reference_node"]:
             # green
@@ -27,6 +33,11 @@ def plot_sensors(esps, fig):
 
 
 def plot_reseau(esps, dims, title, fig):
+    """
+    Place les esps successivement sur un réseaux de plans.
+
+    Utile pour comparer différentes méthodes sur le même jeu.
+    """
     (x0, y0, width, height) = dims
     fig.set_xlim(x0, x0 + width)
     fig.set_ylim(y0, y0 + height)
@@ -35,6 +46,9 @@ def plot_reseau(esps, dims, title, fig):
 
 
 def animation(frame, esp, data, limit, fig):
+    """
+    Responsable de la création d'une frame
+    """
     ax = fig.axes[0]
     ax.clear()
     ax.set_xlim([0, limit])
@@ -53,6 +67,11 @@ def animation(frame, esp, data, limit, fig):
 
 
 def create_fluctuation_video(ref_node, out_file="animation.mp4"):
+    """
+    Créé une vidéo représentant l'évolution de la fluctuation du signal pour `ref_node`.
+
+    Après avoir créé la vidéo elle est jouée et enregistré dans `out_file`
+    """
     fig, ax = plt.subplots()
 
     # curves settings
@@ -75,10 +94,29 @@ def create_fluctuation_video(ref_node, out_file="animation.mp4"):
 
     plt.tight_layout()
 
+    # configure l'aspect ASCII de la barre de progression
     pbar_elts = [
-        f"""Enregistrement de la simulation dans {out_file} [{pbar.SimpleProgress(sep="/")}] {pbar.Timer(format="Temps écoulé: {}")} {pbar.AnimatedMarker(markers="/-|")} {pbar.Bar(left="[", right="]", fill="-", marker="=")} {pbar.ETA()} {pbar.Percentage()})"""
+        "Enregistrement du fichier {}: ".format(out_file),
+        " [",
+        pbar.SimpleProgress(sep="/"),
+        "]",
+        " ",
+        pbar.Timer(format="Temps écoulé: %s"),
+        " ",
+        pbar.AnimatedMarker(markers="/-\\|"),
+        " ",
+        pbar.Bar(left="[", right="]", fill="-", marker="="),
+        " ",
+        pbar.ETA(),
+        " (",
+        pbar.Percentage(),
+        ")",
     ]
+
     pb = pbar.ProgressBar(widgets=pbar_elts, maxval=frames_count)
+
+    def show_progress(frame, total_frames):
+        pb.update(frame)
 
     # recoding
     pb.start()
@@ -86,8 +124,3 @@ def create_fluctuation_video(ref_node, out_file="animation.mp4"):
     pb.finish()
 
     plt.show()
-
-
-def show_progress(frame, total_frames):
-    # how to pass pb to it????
-    pbar.update(frame)

@@ -1,8 +1,18 @@
+# Ce module fournit un ensemble de méthodes utiles à l'ensemble des autres
+# modules du projet. Elle ne contient que les fonctions indépendantes des esp
+# ainsi que des algoruithmes de géolocalisation.
+
 from math import sqrt, log10
 import random
 
 
 def read_csv(file_name):
+    """
+    Lit un le fichier `file_name` et l'interprète comme un CSV afin de
+    construire une liste de dictionnaires représentant des esp8266.
+
+    Affiche un message d'erreur si le fichier n'existe pas et propage l'erreur.
+    """
     esps = []
     try:
         with open(file_name, "r") as file:
@@ -19,6 +29,19 @@ def read_csv(file_name):
 
 
 def esp_from_string(morsels):
+    """
+    Construit un esp à partir d'une liste de str représentant les caractéristiques de l'esp.
+
+    `morsels` est une liste de chaîne de charactères dont les éléments représentent dans l'ordre:
+    - sigma
+    - gamma
+    - d0
+    - P0
+    - coordinates (la position de l'esp)
+    - reference_node (si l'esp est un noeud de référence)
+    - id (l'identifiant entier de l'esp)
+    """
+
     path_loss_params = {}
     path_loss_params["sigma"] = float(morsels.pop())
     path_loss_params["gamma"] = float(morsels.pop())
@@ -36,6 +59,13 @@ def esp_from_string(morsels):
 
 
 def distance(pos0, pos1):
+    """
+    Distance euclidienne entre `pos0` et `pos1`.
+
+    Les deux arguments sont des tuples (x, y) dont les composantes (des floats) sont
+    les coordonnées selon les abscisses et ordonnées du plans, respectivement.
+    """
+
     x0, y0 = pos0
     x1, y1 = pos1
     # distance euclidienne
@@ -43,11 +73,26 @@ def distance(pos0, pos1):
 
 
 def get_signals(amount: int, mean, sigma):
+    """
+    Génère `amount` signaux.
+
+    Cette fonction ne sert que pour la simulation. Dans une situation pratique,
+    elle serait remplacé par un driver qui interagirait avec l'esp pour relever
+    des mesures de signaux.
+    Faute d'esp, il existe cette fonction qui simule des signaux avec un bruits variable.
+    Cette variation (dictée par `sigma`) des signaux suit une loi normale (distribution gaussienne) centrée sur `mean`.
+    """
+
     # valeurs aléatoires sur une distribution gaussienne
     return [random.gauss(mean, sigma) for _ in range(amount)]
 
 
 def get_signal_from_esp(esp, distance):
+    """
+    Génère un signal à partir des caractéristiques de `esp`.
+
+    Les modalités de génération du signal sont les mêmes que pour `get_signals`
+    """
     params = esp["path_loss_params"]
     P0 = params["P0"]
     d0 = params["d0"]
@@ -59,36 +104,57 @@ def get_signal_from_esp(esp, distance):
 
 def expectancy(values):
     """
-    this is only sort of an expectancy.
-    Indeed, although it enventually performs the correct calculation
-    it makes use of the specific formula used in this scenario to optimize away the very notion of probability.
-    This whole simplification process brings it down to a simple weighted average.
+    L'espérance d'un ensemble de puissances.
 
-    L'espérance est tout simplement la moyenne des puissances du signal
+    La formulation générale de l'espérance implique des probabilités et procède à
+    une moyenne pondérée. Seulement ici elle ne sert qu'à l'obtention de la puissance moyenne des signaux.
+    Au vue de l'expression des dites puissances, il est possible de grandement simplifier l'expression de
+    l'espérance. Ainsi dans notre cas elle est équivalente à une simple moyenne.
     """
+
     return sum(values) / len(values)
 
 
 def variance(values):
     """
-    Just as the formula for the expectancy was greatly simplified it is found
-    that the variance of the power of the signal is extremely simple. Indeed the power's
-    formula depends on but one random variable. Since V[aX+b]=a^2*E[X]=V[X]=sigma^2 and a=1 here
-    hence the variance of the power is simply the expectancy
+    La variance d'un ensemble de puissances.
+
+    On procède a des simplification, comme pour l'espérance. Se référer au compte-rendu pour
+    une explication détaillée des simplifications.
     """
-    return expectancy(values)
+
+    return expectancy([val ** 2 for val in values]) - expectancy(values) ** 2
 
 
-def frequencies(values, margin=0):
+def frequencies(values, margin=0.01):
+    """
+    Trie les valeurs par fréquence.
+
+    Cette fonction retourne un dictionnaire représentant la distribution des signaux.
+    `margin` représente la tolérance à partir de laquelle deux valeurs sont considérées identiques.
+    """
+
     freq = {}
     for value in values:
         if margin != 0:
             value = value // margin * margin
         freq[value] = freq.get(value, 0) + 1
-    return dict(sorted(freq.items()))
+    return freq
 
 
 def into_corners(dims):
+    """
+    Divise l'espace `dims`, supposé rectangulaiire, en 4 coins égaux.
+
+    `dims` se présente comme un tuple de 4 floats représentant respectivement:
+    - la coordonnée des abscisses du point supérieur gauche de l'espace
+    - la coordonnée des ordonnées du point supérieur gauche de l'espace
+    - la largeur de l'espace
+    - la heuteur de l'espace (ou la longeur suivant la perception, le calcul reste inchangé)
+
+    La fonction retourne un tuple de quater coins de même structure que `dims`
+    """
+
     (x0, y0, width, height) = dims
     corners = []
     for i in range(2):
@@ -100,10 +166,20 @@ def into_corners(dims):
 
 
 def middle_rect(dims):
+    """
+    Le milieu d'un espace rectangulaire
+    """
     (x0, y0, width, height) = dims
     return (x0 + width / 2, y0 + height / 2)
 
 
 def random_uniform_pos(dims):
+    """
+    Une position aléatoire mais suivant une loi de distribution uniforme.
+
+    Utile pr créé un nuage de points équitablement répartis ds un espace.
+
+    Retourne un tuple de floats.
+    """
     (x0, y0, width, height) = dims
     return (random.uniform(x0, x0 + width), random.uniform(y0, y0 + height))
