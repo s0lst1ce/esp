@@ -14,16 +14,16 @@ def plot_sensors(esps, fig):
     """
     for esp in esps:
         # les nœuds de référence sont verts, les autres sont bleus
-        color = "g" if esp["reference_mode"] else "b"
+        color = "g" if esp["reference_node"] else "b"
         identifier = esp["id"]
         real_pos = esp["coordinates"]
 
         if "predicted_position" in esp:
             pos = esp["predicted_position"]
+            #distance to the esp's real position
+            # used to judge the precision of the estimate
             d = distance(real_pos, pos)
             fig.plot(*pos, color + ".")
-            """ les ESPs qui ne sont pas de référence donnent également la distance par rapport à la réalité,
-                à des fins de vérification et d'estimation de la précision des différentes méthodes"""
             fig.text(*pos, f"{identifier} ({d:.2f})")
         else:
             fig.plot(*real_pos, color + ".")

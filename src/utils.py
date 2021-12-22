@@ -13,22 +13,25 @@ def read_csv(file_name):
 
     Affiche un message d'erreur si le fichier n'existe pas et propage l'erreur.
     """
+    esps = []
     try:
         with open(file_name, "r") as file:
-            
-            return [
+            for line in file.readlines():
+                if line.startswith("#"):
+                    continue
+                line = line.strip("\n")
+                morsels = line.split("\t")
                 # décomposition par lignes et colonnes
-                esp_from_string(line.strip("\n").split())
-                for line in file.readline()
-                if not line.startswith("#")
-            ]
+                esps.append(esp_from_string(morsels))
 
     except Exception as e:
         print("Erreur de lecture du fichier : ", file_name)
         raise e
 
+    return esps
 
-def esp_from_string(line):
+
+def esp_from_string(morsels):
     """
     Construit un esp à partir d'une liste de str représentant les caractéristiques de l'esp.
 
@@ -42,7 +45,6 @@ def esp_from_string(line):
     - id (l'identifiant entier de l'esp)
     """
 
-    morsels = line.split("\t")
     path_loss_params = {}
     path_loss_params["sigma"] = float(morsels.pop())
     path_loss_params["gamma"] = float(morsels.pop())
@@ -50,10 +52,11 @@ def esp_from_string(line):
     path_loss_params["P0"] = float(morsels.pop())
 
     esp = {"path_loss_params": path_loss_params}
+    y, x = float(morsels.pop()), float(morsels.pop())
+    esp["coordinates"] = (x, y)
 
-    esp["coordinates"] = (float(morsels.pop()), float(morsels.pop()))
-
-    esp["reference_node"] = morsels.pop() == "True"
+    is_true = lambda val: val == "True"
+    esp["reference_node"] = is_true(morsels.pop())
     esp["id"] = int(morsels.pop())
     return esp
 

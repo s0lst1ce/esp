@@ -50,7 +50,7 @@ def deux_plus_proches_voisins(ref_esp, esps):
     ref_pos = ref_esp["coordinates"]
     # we don't take the first element since it would be itself
     # indeed the distance to oneself is always 0
-    return sorted(esps, key=lambda esp: distance(esp["coordinate"], ref_pos))[1:3]
+    return sorted(esps, key=lambda esp: distance(esp["coordinates"], ref_pos))[1:3]
 
 
 def signal_moyen(emetteur, receveur, *, epsilon=0.01):
@@ -81,12 +81,15 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
                 sigma,
             )
         )
-        amount *= 2
         new_mean = expectancy(signals)
         if abs(new_mean - mean) <= epsilon:
+            print(
+                f"""Node {emetteur["id"]} had to emit {amount} signals for node {receveur["id"]}"""
+            )
             return new_mean
         else:
             mean = new_mean
+        amount *= 2
 
 
 def calibrage_references(esps):
@@ -122,8 +125,7 @@ def distances_aux_references(esp, ref_esps):
     """
     esp_pos = esp["coordinates"]
     return [
-        dist if 20 >= (dist := distance(esp_pos, ref_esp["coordinates"]))
-        else None
+        dist if 20 >= (dist := distance(esp_pos, ref_esp["coordinates"])) else None
         for ref_esp in ref_esps
     ]
 

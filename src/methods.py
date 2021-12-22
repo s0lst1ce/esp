@@ -116,6 +116,9 @@ def apply_method(
     """
     Applique `methode_interpolation` à tout les `ESPs`.
     """
+    print(
+        f"Applying {methode_interpolation.__name__} method (with args={args} and kwargs={kwargs}"
+    )
     for esp in esps:
         if not esp["reference_node"]:
             methode_interpolation(

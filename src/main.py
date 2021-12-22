@@ -36,7 +36,9 @@ def main():
 
     # methods_comparison((0, -3, 8, 8), source_file="config-reseau.csv")
     esps, dims = random_set()
-    # methods_comparison(dims, esps=esps)
+    print(f"Parameters: {len(esps)} ESP8266 nodes on a {dims[2]}x{dims[3]} space.")
+
+    methods_comparison(dims, esps=esps)
 
     create_fluctuation_video(reference_nodes(esps)[0])
 
