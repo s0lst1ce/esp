@@ -4,4 +4,7 @@
 bin
 lib
 lib64
+share
 *__pycache__*
+animation.mp4
+localisation.png
