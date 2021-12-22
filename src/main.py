@@ -64,7 +64,7 @@ def random_set():
 
 def methods_comparison(dims, source_file=None, esps=[]):
     """
-    Applique et visualise successivement toutes les méthodes de géolocalsation.
+    Applique et visualise successivement toutes les méthodes de géolocalisation.
 
     Nécessite un jeu d'esps qui peut venir d'un fichier source (`source_file`),
     d'une liste d'`esps` ou d'une combinaison des deux. `dims` est la description de l'espace
