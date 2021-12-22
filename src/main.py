@@ -40,7 +40,7 @@ def main():
 
     methods_comparison(dims, esps=esps)
 
-    create_fluctuation_video(reference_nodes(esps)[0])
+    # create_fluctuation_video(reference_nodes(esps)[0])
 
 
 def random_set():
@@ -55,9 +55,9 @@ def random_set():
 
     esps = []
     for i in range(ref_node_count):
-        esps.append(new_esp(i, dims, ref=True))
+        esps.append(new_esp(i, (0, 0, 5, 5), ref=True))
     for i in range(ref_node_count, node_count):
-        esps.append(new_esp(i, dims))
+        esps.append(new_esp(i, (0, 0, 20, 20)))
 
     return (esps, dims)
 
@@ -93,11 +93,11 @@ def methods_comparison(dims, source_file=None, esps=[]):
 
     # méthode de partition
     apply_method(esps, ref_esps, distances, dims, methode_partition)
-    plot_reseau(ref_esps, dims, "Méthode par partition", axs[0][2])
+    plot_reseau(esps, dims, "Méthode par partition", axs[0][2])
 
     # méthode de Monte-Carlo
     apply_method(esps, ref_esps, distances, dims, methode_MonteCarlo)
-    plot_reseau(ref_esps, dims, "Méthode de Monté-Carlo", axs[0][3])
+    plot_reseau(esps, dims, "Méthode de Monté-Carlo", axs[0][3])
 
     # méthodes de gradient utilisant les divers méthode de calcul de gradient
     (i, j) = (1, 0)
