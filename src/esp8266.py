@@ -4,20 +4,20 @@ from math import log10
 
 def mean_power(distance, loss_params):
     """
-    La puissance moyenne théorique pour un esp de caractéristiques
-    `loss_params` (voir la clé "path_loss_params" d'un esp) à une distance
-    `distance` d'un autre esp.
+    La puissance moyenne théorique pour un ESP de caractéristiques
+    `loss_params` (voir la clé "path_loss_params" d'un ESP) à une distance
+    `distance` d'un autre ESP.
     """
     return loss_params["P0"] - 10 * loss_params["gamma"] * log10(distance)
 
 
 def path_loss_params_estimation(s1, s2):
     """
-    Estimation des caractéristiques d'un esp à partir de deux esp de référence.
+    Estimation des caractéristiques d'un esp à partir de deux ESP de référence.
 
     `s1` et `s2` sont des tuples de la forme (distance, puissance)
-    où distance est la distance entre l'esp étudié et l'esp de référence.
-    Puissance est la puissance moyenne reçue par l'esp étudié par l'esp de référence.
+    où distance est la distance entre l'ESP étudié et l'ESP de référence.
+    Puissance est la puissance moyenne reçue par l'ESP étudié par l'ESP de référence.
 
     Retourne le triplet de caractéristiques (P0, d0, gamma)
     """
@@ -34,14 +34,9 @@ def path_loss_params_estimation(s1, s2):
 
 def reference_nodes(esps):
     """
-    Retoune la liste des esps de référence parmis la liste `esps` d'esps.
+    Retoune la liste des esps de référence parmi la liste `esps` d'ESPs.
     """
-
-    ref_esps = []
-    for esp in esps:
-        if esp["reference_node"] == True:
-            ref_esps.append(esp)
-    return esps
+    return [esp for esp in esps if esp["reference_node"]]
 
 
 def deux_plus_proches_voisins(ref_esp, esps):
@@ -49,18 +44,13 @@ def deux_plus_proches_voisins(ref_esp, esps):
     Détermine les deux plus proches voisins de `ref_esp`
 
     Retourne un tuple contenant ces deux plus proches voisins.
-    S'il existe plusieurs voisins à la même disitance, seul l'un d'eux est
-    séléctionné.
+    S'il existe plusieurs voisins à la même distance, seul l'un d'eux est
+    sélectionné.
     """
     ref_pos = ref_esp["coordinates"]
-    dist_map = {}
-    for esp in esps:
-        dist_map[distance(ref_pos, esp["coordinates"])] = esp
-    distances = list(dist_map.keys())
-    distances.sort()
-    # we don't take the first element since it would be itslef
+    # we don't take the first element since it would be itself
     # indeed the distance to oneself is always 0
-    return (dist_map[distances[1]], dist_map[distances[2]])
+    return sorted(esps, key=lambda esp: distance(esp["coordinate"], ref_pos))[1:3]
 
 
 def signal_moyen(emetteur, receveur, *, epsilon=0.01):
@@ -94,8 +84,6 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
         amount *= 2
         new_mean = expectancy(signals)
         if abs(new_mean - mean) <= epsilon:
-            # plot_power(signals, real_mean, sigma)
-            # print(amount / 2)
             return new_mean
         else:
             mean = new_mean
@@ -103,9 +91,9 @@ def signal_moyen(emetteur, receveur, *, epsilon=0.01):
 
 def calibrage_references(esps):
     """
-    Calibre parmis `esps` les esps de référence entre eux.
+    Calibre parmi `esps` les ESPs de référence entre eux.
 
-    Cette fonction modifie les esps en place.
+    Cette fonction modifie les ESPs en place.
     """
     ref_esps = reference_nodes(esps)
     assert len(ref_esps) >= 3, "At least three reference nodes are needed to calibrate"
@@ -123,42 +111,40 @@ def calibrage_references(esps):
 
 def distances_aux_references(esp, ref_esps):
     """
-    La distance de `esp` à l'ensemble des esps de référence (`ref_esps`)
+    La distance de `esp` à l'ensemble des ESPs de référence (`ref_esps`)
 
-    Si la diistance entre l'esp étudié et un esp de référence est supérieure
-    à 20m, la distance est plutôt fixée à `None` car il n'est plus possible
+    Si la distance entre l'ESP étudié et un ESP de référence est supérieure à 20m,
+    la distance est plutôt fixée à `None` car il n'est plus possible
     de considérer les mesures comme fiables.
 
     Retourne une liste des distances, chaque élément correspondant à la distance entre `esp`
     et l'élément de même indice de `ref_esps`.
     """
-    distances = []
-    for ref_esp in ref_esps:
-        dist = distance(esp["coordinates"], ref_esp["coordinates"])
-        if dist >= 20:
-            dist = None
-        distances.append(dist)
-
-    return distances
+    esp_pos = esp["coordinates"]
+    return [
+        dist if 20 >= (dist := distance(esp_pos, ref_esp["coordinates"]))
+        else None
+        for ref_esp in ref_esps
+    ]
 
 
 def MSE(pos, ref_esps, distances):
     """
     Carré de l'écart entre les distances mesurées et les distances attendues.
 
-    Cette fonction est utiile dans le contexte des méthode de géolocalisation
+    Cette fonction est utile dans le contexte des méthode de géolocalisation
     où elle sert à attribuer un score aux estimations successives. Elle sert donc
     de guide pour le déplacement des points (donc des esps) auxquelles procèdent les
     méthodes (c.f. `methods.py`).
 
-    `pos` représente la position de l'esp étudié
+    `pos` représente la position de l'ESP étudié
     `ref_esps` est une liste de l'ensemble des noeuds de référence
-    `distance` représente la distance entre l'esp en `pos` et les esps de référence
+    `distance` représente la distance entre l'ESP en `pos` et les ESPs de référence
     Ces deux dernières listes doivent être ordonnées identiquement, voir `distances_aux_references`
     pour plus d'information.
 
     Retourne le score, soit le carré de la différence entre la valeur attendue et la valeur mesurée.
-    Si tout les esps sont trop loin de `esp`, retourne -1.0.
+    Si tout les ESPs sont trop loin de `esp`, retourne -1.0.
     """
     assert (node_nbr := len(ref_esps)) == len(
         distances
@@ -166,9 +152,7 @@ def MSE(pos, ref_esps, distances):
 
     count = 0
     score = 0
-    for i in range(node_nbr):
-        ref_esp = ref_esps[i]
-        real_distance = distances[i]
+    for ref_esp, real_distance in zip(ref_esps, distances):
         if real_distance is not None:
             measured_distance = distance(pos, ref_esp["coordinates"])
             score += (real_distance - measured_distance) ** 2
@@ -186,25 +170,25 @@ def MSE(pos, ref_esps, distances):
 
 def new_esp(identifier, dims, ref=False):
     """
-    Créé un esp de caractéristiques aléatoires dans l'espace `dim`
+    Crée un ESP de caractéristiques aléatoires dans l'espace `dim`
 
-    Nécessite l'identifiant (`identfier`) de l'esp ainsi que `ref` pour savoir
+    Nécessite l'identifiant (`identfier`) de l'ESP ainsi que `ref` pour savoir
     s'il est de référence ou non.
 
-    Retourne un dictionnaire représentant le nouvel esp.
+    Retourne un dictionnaire représentant le nouvel ESP.
     """
     # change to something more random
     pos = random_uniform_pos(dims)
     d0 = 1.0
-    P0 = -random.randrange(450, 650) / 10
-    gamma = random.randrange(20, 30) / 10
-    sigma = random.randrange(100, 200) / 100
+    P0 = random.uniform(-65, -45)
+    gamma = random.uniform(2, 3)
+    sigma = random.randrange(1, 2)
     return to_esp(identifier, pos, P0, gamma, sigma, d0=d0, ref=ref)
 
 
 def to_esp(identifier, pos, P0, gamma, sigma, ref=False, d0=1.0):
     """
-    Construit le dictionnaire représentant l'esp.
+    Construit le dictionnaire représentant l'ESP.
     """
     path_loss_params = {"sigma": sigma, "gamma": gamma, "d0": d0, "P0": P0}
     return {

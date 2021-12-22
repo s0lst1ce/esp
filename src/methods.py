@@ -6,10 +6,11 @@ from esp8266 import MSE
 import random
 from scipy import optimize as opti
 
-# FIXME what is all MSE return -1? We'll have wrong values
-
 
 def methode_partition(esp, ref_esps, distances, dims, *, epsilon=0.01):
+    """
+    détermination de la position par méthode des partitions (ici itération d'une grille 2x2)
+    """
     if dims[2] * dims[3] < epsilon:
         esp["predicted_position"] = middle_rect(dims)
 
@@ -39,6 +40,9 @@ def methode_partition(esp, ref_esps, distances, dims, *, epsilon=0.01):
 def methode_MonteCarlo(
     esp, ref_esps, distances, dims, *, epsilon=0.01, nb_tirages=None
 ):
+    """
+    détermination de la position par méthode de Monte-Carlo
+    """
     (x0, y0, width, height) = dims
 
     if width * height < epsilon:
@@ -46,7 +50,6 @@ def methode_MonteCarlo(
         return None
 
     if nb_tirages is None:
-        # jspas quel choix a le plus de sens :shrug:
         points_nbr = int(max(width, height)) + 1
 
     assert (
@@ -67,7 +70,7 @@ def methode_MonteCarlo(
             "All reference esps were too far from `esp`, hence the method couldn't be applied"
         )
     if min_mse == 0:
-        eps["predicted_position"] = min_pos
+        esp["predicted_position"] = min_pos
     else:
         methode_MonteCarlo(
             esp,
@@ -88,6 +91,9 @@ def methode_MonteCarlo(
 def methode_gradient(
     esp, ref_esps, distances, dims, *, epsilon=0.01, methode="L-BFGS-B"
 ):
+    """
+    détermination de la position par la méthode du gradient définie
+    """
     (x0, y0, width, height) = dims
     if width * height < epsilon:
         esp["predicted_position"] = middle_rect(dims)
@@ -108,7 +114,7 @@ def apply_method(
     esps, ref_esps, distances, dims, methode_interpolation, *args, **kwargs
 ):
     """
-    Applique `methode_interpolation` à tout les `esps`.
+    Applique `methode_interpolation` à tout les `ESPs`.
     """
     for esp in esps:
         if not esp["reference_node"]:

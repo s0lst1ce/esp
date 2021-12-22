@@ -43,7 +43,7 @@ def main():
 
 def random_set():
     """
-    Génère un jeu d'esps dans un espace aléatoire.
+    Génère un jeu d'<ESPs dans un espace aléatoire.
     """
     ref_node_count = random.randrange(3, 20)
     node_count = ref_node_count + random.randrange(1, 10)
