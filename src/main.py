@@ -26,7 +26,7 @@ def plot_power(signals, real_mean, real_sigma):
 
 def main():
     """
-    Effectue successivement les différentes visualisation requises pour l'étude.
+    Effectue successivement les différentes visualisations requises pour l'étude.
     """
     print("Running ESP8266 positionning simulation")
     # plot_power(get_measures(4096, -55, 1.6))
@@ -43,7 +43,7 @@ def main():
 
 def random_set():
     """
-    Génère un jeu d'esps dans un espace aléatoire.
+    Génère un jeu d'ESPs dans un espace aléatoire.
     """
     ref_node_count = random.randrange(3, 20)
     node_count = ref_node_count + random.randrange(1, 10)

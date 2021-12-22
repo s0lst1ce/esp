@@ -10,31 +10,29 @@ import progressbar as pbar
 
 def plot_sensors(esps, fig):
     """
-    Place les esp sur le plan.
+    Place les ESP sur le plan.
     """
     for esp in esps:
-        if esp["reference_node"]:
-            # green
-            color = "g"
-        else:
-            # blue
-            color = "b"
+        # les nœuds de référence sont verts, les autres sont bleus
+        color = "g" if esp["reference_mode"] else "b"
         identifier = esp["id"]
-        (x, y) = esp["coordinates"]
+        real_pos = esp["coordinates"]
 
         if "predicted_position" in esp:
             pos = esp["predicted_position"]
+            d = distance(real_pos, pos)
             fig.plot(*pos, color + ".")
-            d = distance((x, y), pos)
+            """ les ESPs qui ne sont pas de référence donnent également la distance par rapport à la réalité,
+                à des fins de vérification et d'estimation de la précision des différentes méthodes"""
             fig.text(*pos, f"{identifier} ({d:.2f})")
         else:
-            fig.plot(x, y, color + ".")
-            fig.text(x, y, identifier)
+            fig.plot(*real_pos, color + ".")
+            fig.text(*real_pos, identifier)
 
 
 def plot_reseau(esps, dims, title, fig):
     """
-    Place les esps successivement sur un réseaux de plans.
+    Place les ESPs successivement sur un réseaux de plans.
 
     Utile pour comparer différentes méthodes sur le même jeu.
     """
