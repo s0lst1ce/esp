@@ -1,3 +1,6 @@
+# Méthode de g.olocalisation
+# L'explicaton de leur fonctionnement peut être trouvé dans le rapport.
+
 from utils import *
 from esp8266 import MSE
 import random
@@ -21,6 +24,10 @@ def methode_partition(esp, ref_esps, distances, dims, *, epsilon=0.01):
                 min_mse = mse
                 matching_corner = i
 
+        if min_mse == -1:
+            raise ValueError(
+                "All reference esps were too far from `esp`, hence the method couldn't be applied"
+            )
         if min_mse == 0:
             esp["predicted_position"] = pos
         else:
@@ -55,6 +62,10 @@ def methode_MonteCarlo(
             min_mse = mse
             matching_pos = pos
 
+    if min_mse == -1:
+        raise ValueError(
+            "All reference esps were too far from `esp`, hence the method couldn't be applied"
+        )
     if min_mse == 0:
         eps["predicted_position"] = min_pos
     else:
@@ -91,3 +102,16 @@ def methode_gradient(
             esp["predicted_position"] = (outcome.x[0], outcome.x[1])
         else:
             esp["predicted_position"] = random_uniform_pos(dims)
+
+
+def apply_method(
+    esps, ref_esps, distances, dims, methode_interpolation, *args, **kwargs
+):
+    """
+    Applique `methode_interpolation` à tout les `esps`.
+    """
+    for esp in esps:
+        if not esp["reference_node"]:
+            methode_interpolation(
+                esp, ref_esps, distances[esp["id"]], dims, *args, **kwargs
+            )

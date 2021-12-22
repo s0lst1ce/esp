@@ -3,11 +3,20 @@ from math import log10
 import random
 from matplotlib import pyplot as plt
 from esp8266 import *
-from methods import methode_partition, methode_MonteCarlo, methode_gradient
+from methods import (
+    methode_partition,
+    methode_MonteCarlo,
+    methode_gradient,
+    apply_method,
+)
 from graphical import plot_reseau, create_fluctuation_video
 
 
 def plot_power(signals, real_mean, real_sigma):
+    """
+    Permet de visualiser la distribution des `signals`
+    """
+
     # just to get a quick view into the shape of the distribution
     # does not act as a proof
     freq = frequencies(signals, margin=0.01)
@@ -16,6 +25,9 @@ def plot_power(signals, real_mean, real_sigma):
 
 
 def main():
+    """
+    Effectue successivement les différentes visualisation requises pour l'étude.
+    """
     print("Running ESP8266 positionning simulation")
     # plot_power(get_measures(4096, -55, 1.6))
     # print(read_csv("config-reseau.csv"))
@@ -30,6 +42,9 @@ def main():
 
 
 def random_set():
+    """
+    Génère un jeu d'esps dans un espace aléatoire.
+    """
     ref_node_count = random.randrange(3, 20)
     node_count = ref_node_count + random.randrange(1, 10)
     width = random.randrange(10, 50)
@@ -46,6 +61,14 @@ def random_set():
 
 
 def methods_comparison(dims, source_file=None, esps=[]):
+    """
+    Applique et visualise successivement toutes les méthodes de géolocalsation.
+
+    Nécessite un jeu d'esps qui peut venir d'un fichier source (`source_file`),
+    d'une liste d'`esps` ou d'une combinaison des deux. `dims` est la description de l'espace
+    dans lequel la simulation se produit. Pour en savoir plus sur `dims` voir `utils.into_corners`
+    """
+
     if source_file is not None:
         try:
             esps.extend(read_csv(source_file))
