@@ -92,7 +92,7 @@ def methode_gradient(
     esp, ref_esps, distances, dims, *, epsilon=0.01, methode="L-BFGS-B"
 ):
     """
-    détermination de la position par la méthode du gradient définie
+    détermination de la position par les dérivées numériques calculées avec la méthode `methode`"
     """
     (x0, y0, width, height) = dims
     if width * height < epsilon:
