@@ -193,11 +193,16 @@ def new_esp(identifier, dims, ref=False):
 
     Retourne un dictionnaire représentant le nouvel esp.
     """
-    # change to something more random
+    # we could change to something more random but this way
+    # we get sets that are easier to display on a plot and we retain
+    # very sensible results
     pos = random_uniform_pos(dims)
     d0 = 1.0
     P0 = -random.randrange(450, 650) / 10
-    gamma = random.randrange(20, 30) / 10
+    gamma = random.randrange(200, 300) / 100
+    # we prefer to simply create a sensible sigma rather than
+    # calculate it through `variance` (afterall V[P]=sigma^2)
+    # since it would require generating a heap of values
     sigma = random.randrange(100, 200) / 100
     return to_esp(identifier, pos, P0, gamma, sigma, d0=d0, ref=ref)
 
